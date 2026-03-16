@@ -15,11 +15,15 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import React, { useState } from "react"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [user, setUser] = useState({
+    email: "",
+  });
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -52,6 +56,8 @@ export function LoginForm({
                   id="email"
                   type="email"
                   placeholder="m@example.com"
+                  value={user.email}
+                  onChange={(e) => setUser({...user, email: e.target.value})}
                   required
                 />
               </Field>
