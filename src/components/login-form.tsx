@@ -15,7 +15,10 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import React, { useState } from "react"
+import React, { useState } from "react";
+import { toast } from "sonner";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export function LoginForm({
   className,
@@ -24,6 +27,23 @@ export function LoginForm({
   const [user, setUser] = useState({
     email: "",
   });
+  const router = useRouter();
+  const onLogin = async () => {
+    try {
+      if (user.email.length == 0) {
+              toast.error("Enter Your Email");
+              return;
+      }
+      const response = await axios.post("/api/login", user);
+      toast.success("Login Success");
+      // console.log("/profile/" + response.data.user.username);
+      // console.log(response.data.user.username)
+      router.push("/profile/" + response.data.user.username)
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Login Failed";
+      toast.error(message);
+    }
+  }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -62,7 +82,12 @@ export function LoginForm({
                 />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit" onClick={
+                  (e) => {
+                    e.preventDefault();
+                    onLogin();
+                  }
+                }>Login</Button>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account? <a href="/signup">Sign up</a>
                 </FieldDescription>
