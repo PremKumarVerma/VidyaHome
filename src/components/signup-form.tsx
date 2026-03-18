@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import React, { useState } from "react"
+import { toast } from "sonner"
+import axios from "axios"
+import {useRouter} from "next/navigation"
 
 export function SignupForm({
   className,
@@ -19,8 +22,23 @@ export function SignupForm({
   const [user, setUser] = useState({
     email: "",
   })
+  const router = useRouter();
+  const onSignup = async () => {
+      try {
+        if(user.email.length == 0){
+          toast.error("Enter Your Email")
+          return
+        }
+        const response = await axios.post("/api/signup", user)
+        toast.success("Signup Success")
+        router.push("/login")
+      } catch (error: any) {
+        toast.error("Signup Failed")
+        console.log(error)
+      }
+  }
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)}>
       <form>
         <FieldGroup>
           <div className="flex flex-col items-center gap-2 text-center">
@@ -41,7 +59,7 @@ export function SignupForm({
             />
           </Field>
           <Field>
-            <Button type="submit">Create Account</Button>
+            <Button type="submit" onClick={onSignup}>Create Account</Button>
           </Field>
           <FieldSeparator>Or</FieldSeparator>
             <Button variant="outline" type="button">
