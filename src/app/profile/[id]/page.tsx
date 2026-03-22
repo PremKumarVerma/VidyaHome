@@ -3,9 +3,11 @@ import axios from "axios";
 import React from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 export default async function ProfilePage({params}:any) {
     const { id }:any = await React.use(params)
     const router = useRouter()
+    const [data, setData] = useState(null)
     const logOut = async () => {
       try {
         await axios.get("/api/logout");
@@ -14,6 +16,17 @@ export default async function ProfilePage({params}:any) {
       } catch (error) {
         console.error("Logout failed:", error);
         toast.error("Logout failed. Please try again.");
+      }
+    }
+
+    const getUserDetails = async () => {
+      try {
+        const res = await axios.get("/api/me");
+        console.log(res.data)
+        setData(res.data.data)
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+        toast.error("Error fetching user details. Please try again.");
       }
     }
   return (
