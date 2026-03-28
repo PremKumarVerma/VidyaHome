@@ -4,10 +4,9 @@ import React from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-export default async function ProfilePage({params}:any) {
-    const { id }:any = await React.use(params)
+export default function ProfilePage() {
     const router = useRouter()
-    const [data, setData] = useState(null)
+    const [data, setData] = useState<any>(null)
     const logOut = async () => {
       try {
         await axios.get("/api/logout");
@@ -29,11 +28,14 @@ export default async function ProfilePage({params}:any) {
         toast.error("Error fetching user details. Please try again.");
       }
     }
+    React.useEffect(() => {
+      getUserDetails()
+    }, [])
   return (
     <div className="min-h-screen">
       <div className="flex justify-between mx-10 p-6 rounded-xl shadow-md mb-6">
         <h1>Profile</h1>
-        <h1>{id}</h1>
+        <h1>{data?.username}</h1>
       </div>
       <div className="flex justify-between mx-10 p-6 rounded-xl shadow-md mb-6">
         <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={logOut}>Logout</button>
