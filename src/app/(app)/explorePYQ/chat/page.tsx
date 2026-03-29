@@ -17,6 +17,8 @@ export default function FullChatPage() {
   const predefinedOptions = [
     "Ask Questions",
     "Create Sample Paper",
+    "Create Assignments",
+    "Create Notes",
   ];
 
   const sendMessage = async (text: string) => {

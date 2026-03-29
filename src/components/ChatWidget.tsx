@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import axios from "axios";
 
 type Message = {
   role: "user" | "ai";
-  text: string;
+  contents: string;
 };
 
 export default function ChatWidget() {
@@ -24,14 +25,12 @@ export default function ChatWidget() {
   ];
 
   const sendMessage = async (text: string) => {
-    if (!text.trim() && !file) return;
+    if (!text.trim()) return;
 
-    const userText = text || (file ? `Uploaded: ${file.name}` : "");
+    // const userText = text || (file ? `Uploaded: ${file.name}` : "");
+    const userText = text;
 
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", text: userText },
-    ]);
+    setMessages((prev) => [...prev, { role: "user", contents: userText }]);
 
     setInput("");
     setLoading(true);
@@ -40,31 +39,33 @@ export default function ChatWidget() {
       const formData = new FormData();
       formData.append("message", text);
 
-      if (file) {
-        formData.append("file", file);
-      }
+      // if (file) {
+      //   formData.append("file", file);
+      // }
 
-      const res = await axios.post("/api/chat", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      const res = await axios.post("/api/chat", {
+        messages: [{ role: "user", contents: text }],
       });
 
+      console.log("Frontend Data:", res.data.response);
+
       setMessages((prev) => [
         ...prev,
-        { role: "ai", text: res.data.reply },
+        { role: "ai", contents: res.data.response },
       ]);
 
-      setFile(null);
+      // console.log("Messages:", messages);
+      // setFile(null);
     } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "ai", text: "Error 😓" },
-      ]);
+      setMessages((prev) => [...prev, { role: "ai", contents: "Error 😓" }]);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    console.log("Updated Messages:", messages);
+  }, [messages]);
 
   return (
     <>
@@ -96,7 +97,7 @@ export default function ChatWidget() {
               </button>
 
               <button
-                onClick={() => window.open("/chat", "_blank")}
+                onClick={() => window.open("/explorePYQ/chat", "_blank")}
                 className="text-xs px-2 py-1 bg-gray-200 rounded"
               >
                 ↗
@@ -128,14 +129,14 @@ export default function ChatWidget() {
                     : "bg-gray-200"
                 }`}
               >
-                {msg.text}
+                <ReactMarkdown>
+                  {msg.contents.replace(/\\n/g, "\n")}
+                </ReactMarkdown>
               </div>
             ))}
 
             {loading && (
-              <div className="text-gray-400 text-xs">
-                AI is typing...
-              </div>
+              <div className="text-gray-400 text-xs">AI is typing...</div>
             )}
           </div>
 
@@ -161,7 +162,6 @@ export default function ChatWidget() {
 
           {/* Input + Upload */}
           <div className="flex p-2 border-t gap-2 items-center">
-            
             {/* 📎 Upload */}
             <label className="cursor-pointer bg-gray-200 px-2 py-1 rounded text-sm">
               📎
