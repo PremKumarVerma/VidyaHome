@@ -66,12 +66,16 @@ export default function ChatWidget() {
 
   const downloadPDF = async (message: Message) => {
     try {
-      const res = await axios.post("/api/createPDF", { messages: [message] }, { responseType: "arraybuffer" });
+      const res = await axios.post(
+        "/api/createPDF",
+        { messages: [message] },
+        { responseType: "arraybuffer" },
+      );
       const blob = new Blob([res.data], { type: "application/pdf" });
 
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
-      
+
       link.href = url;
       link.download = "ai-response.pdf";
       link.click();
@@ -79,7 +83,7 @@ export default function ChatWidget() {
       console.error("PDF error", error);
       toast.error("Error downloading PDF");
     }
-  }
+  };
 
   useEffect(() => {
     console.log("Updated Messages:", messages);
@@ -138,20 +142,34 @@ export default function ChatWidget() {
               </div>
             )}
 
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`p-2 rounded-lg text-sm max-w-[80%] ${
-                  msg.role === "user"
-                    ? "bg-blue-500 text-white ml-auto"
-                    : "bg-gray-200"
-                }`}
-              >
-                <ReactMarkdown>
-                  {msg.contents.replace(/\\n/g, "\n")}
-                </ReactMarkdown>
-              </div>
-            ))}
+            {messages.map((msg, i) => {
+              const isLastMessage = i === messages.length - 1;
+
+              return (
+                <div
+                  key={i}
+                  className={`p-2 rounded-lg text-sm max-w-[80%] ${
+                    msg.role === "user"
+                      ? "bg-blue-500 text-white ml-auto"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  <ReactMarkdown>
+                    {msg.contents.replace(/\\n/g, "\n")}
+                  </ReactMarkdown>
+
+                  {/* ✅ SHOW BUTTON ONLY FOR LAST AI MESSAGE */}
+                  {msg.role === "ai" && isLastMessage && (
+                    <button
+                      onClick={() => downloadPDF(msg)}
+                      className="mt-2 text-xs bg-blue-500 text-white px-2 py-1 rounded"
+                    >
+                      📄 Download PDF
+                    </button>
+                  )}
+                </div>
+              );
+            })}
 
             {loading && (
               <div className="text-gray-400 text-xs">AI is typing...</div>
