@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import axios from "axios";
+import { toast } from "sonner";
 
 type Message = {
   role: "user" | "ai";
@@ -62,6 +63,23 @@ export default function ChatWidget() {
       setLoading(false);
     }
   };
+
+  const downloadPDF = async (message: Message) => {
+    try {
+      const res = await axios.post("/api/createPDF", { messages: [message] }, { responseType: "arraybuffer" });
+      const blob = new Blob([res.data], { type: "application/pdf" });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      
+      link.href = url;
+      link.download = "ai-response.pdf";
+      link.click();
+    } catch (error) {
+      console.error("PDF error", error);
+      toast.error("Error downloading PDF");
+    }
+  }
 
   useEffect(() => {
     console.log("Updated Messages:", messages);
